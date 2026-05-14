@@ -1,7 +1,0 @@
-{
-  "name": "nexa-payment-gateway",
-  "version": "1.0.0",
-  "scripts": {
-    "start": "serve ."
-  }
-}
