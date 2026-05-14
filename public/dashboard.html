@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DASHBOARD | NEXAPAY</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: #000 url('https://i.ibb.co.com/KxkC9zbH/minecraft-farm-wallpaper.jpg') no-repeat center center fixed;
+            background-size: cover;
+            color: white;
+            margin: 0;
+            overflow: hidden;
+            height: 100vh;
+        }
+
+        /* Base Glass Style */
+        .glass-panel {
+            background: rgba(10, 10, 10, 0.98);
+            border: 1.5px solid rgba(255, 255, 255, 0.2);
+            border-radius: 24px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8);
+            display: none;
+            z-index: 4000; /* Pastikan di atas overlay */
+            pointer-events: auto;
+        }
+
+        /* Profile Popup - SEKARANG MENGGUNAKAN FIXED POSITIONING */
+        .profile-popup {
+            position: fixed;
+            top: 90px; /* Jarak dari atas (menyesuaikan header) */
+            right: 20px;
+            width: 280px;
+            padding: 20px;
+            animation: slideDown 0.2s ease-out forwards;
+        }
+
+        /* Menu Popup (Sidebar) */
+        .menu-popup {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.9);
+            width: 290px;
+            padding: 25px;
+            animation: popupSpring 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+        }
+
+        /* Overlay */
+        .overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            z-index: 3000; 
+            pointer-events: auto;
+        }
+
+        .overlay.blur-mode {
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+
+        .overlay.no-blur {
+            backdrop-filter: none !important;
+            -webkit-backdrop-filter: none !important;
+        }
+
+        .overlay.active {
+            display: block;
+        }
+
+        @keyframes popupSpring {
+            to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Header */
+        .header-bar {
+            position: fixed;
+            top: 15px;
+            left: 15px;
+            right: 15px;
+            height: 65px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 20px;
+            z-index: 1000;
+        }
+
+        /* Hero Text */
+        .hero-section {
+            position: absolute;
+            top: 45%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            width: 100%;
+            pointer-events: none;
+            z-index: 500;
+        }
+
+        .hero-title {
+            font-size: 3.5rem;
+            font-weight: 900;
+            font-style: italic;
+            letter-spacing: -2px;
+            line-height: 0.9;
+        }
+
+        /* Navbar */
+        .bottom-nav {
+            position: fixed;
+            bottom: 25px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 90%;
+            max-width: 400px;
+            height: 65px;
+            background: rgba(0, 0, 0, 0.9);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: space-around;
+            z-index: 1000;
+        }
+
+        /* PERBAIKAN ANIMASI NAVBAR BAWAH */
+        .nav-btn {
+            font-size: 12px;
+            font-weight: 800;
+            color: rgba(255, 255, 255, 0.5);
+            cursor: pointer;
+            padding: 12px 20px;
+            border-radius: 20px;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            -webkit-tap-highlight-color: transparent; /* Hilangkan efek biru bawaan HP */
+            user-select: none;
+        }
+        
+        .nav-btn.active { color: #fbbf24; }
+        
+        /* Efek ditekan (Shrink & Bounce) */
+        .nav-btn:active {
+            transform: scale(0.85);
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .menu-item {
+            padding: 14px;
+            border-radius: 15px;
+            font-weight: 700;
+            font-size: 13px;
+            color: white;
+            cursor: pointer;
+            margin-bottom: 8px;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.05);
+            transition: all 0.2s;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .menu-item:active { transform: scale(0.95); }
+        .menu-item:hover { background: #fbbf24; color: #000; }
+
+        /* API BOX */
+        .api-box {
+            background: #111;
+            border: 1px solid #333;
+            padding: 12px;
+            border-radius: 12px;
+            font-family: 'Courier New', monospace;
+            font-size: 11px;
+            color: #fbbf24;
+            cursor: pointer;
+            word-break: break-all;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 4px;
+            position: relative;
+            transition: transform 0.15s ease;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .api-box:active {
+            transform: scale(0.96);
+        }
+
+        .label { font-size: 9px; font-weight: 800; color: #777; letter-spacing: 1px; text-transform: uppercase; margin-top: 10px; }
+        .value { font-size: 13px; font-weight: 700; color: white; display: block; }
+        
+        .btn-doc {
+            background: #fbbf24;
+            color: black;
+            font-weight: 800;
+            font-size: 11px;
+            padding: 12px;
+            border-radius: 12px;
+            width: 100%;
+            margin-top: 15px;
+            text-align: center;
+            display: block;
+            text-decoration: none;
+            transition: transform 0.15s ease;
+        }
+        .btn-doc:active { transform: scale(0.95); }
+    </style>
+</head>
+<body>
+
+    <div id="overlay" class="overlay" onclick="closeAll()"></div>
+
+    <header class="header-bar">
+        <button onclick="toggleMenu()" class="p-2 active:scale-75 transition-transform">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+        </button>
+        
+        <span class="font-black italic tracking-tighter text-lg">NEXAPAY</span>
+
+        <button onclick="toggleProfile()" class="w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center border border-white/20 active:scale-75 transition-transform">
+            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+        </button>
+    </header>
+
+    <div id="profilePopup" class="glass-panel profile-popup" onclick="event.stopPropagation()">
+        <div class="flex flex-col gap-1 text-left">
+            <span class="label !mt-0">Role</span>
+            <span class="value text-amber-400">Reseller H2H</span>
+
+            <span class="label">Username</span>
+            <span id="p-username" class="value">---</span>
+
+            <span class="label">Password</span>
+            <span class="value">••••••••</span>
+
+            <span class="label">Saldo Aktif</span>
+            <span id="p-saldo" class="value text-green-400">RP 0</span>
+
+            <span class="label">API Key</span>
+            <div id="p-apikey-container" class="api-box" onclick="copyKey(event)">
+                <span id="p-apikey">---</span>
+                <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+            </div>
+
+            <a href="public/docs.html" class="btn-doc">DOCUMENTS API</a>
+
+            <button onclick="logout()" class="w-full py-3 mt-3 rounded-xl bg-red-600/20 border border-red-600/50 text-red-500 font-bold text-[10px] active:scale-95 transition-all">LOGOUT</button>
+        </div>
+    </div>
+
+    <div id="menuPopup" class="glass-panel menu-popup" onclick="event.stopPropagation()">
+        <div class="text-[9px] font-black text-gray-500 mb-5 tracking-[0.3em] text-center">SIDEBAR MENU</div>
+        <nav>
+            <div class="menu-item" onclick="location.reload()">DASHBOARD</div>
+            <div class="menu-item" onclick="location.href='public/docs.html'">API DOCUMENTS</div>
+            <div class="menu-item">TOPUP SALDO</div>
+            <div class="menu-item">RIWAYAT TRANSAKSI</div>
+        </nav>
+    </div>
+
+    <div class="hero-section" id="intro">
+        <h1 class="hero-title">WELCOME<br>BACK.</h1>
+        <p class="text-[11px] font-bold opacity-40 mt-4 tracking-[0.4em]" id="u-display">USER</p>
+    </div>
+
+    <nav class="bottom-nav">
+        <div class="nav-btn active" onclick="location.reload()">HOME</div>
+        <div class="nav-btn">QRIS</div>
+        <div class="nav-btn" onclick="toggleMenu()">MENU</div>
+    </nav>
+
+    <script>
+        const userData = {
+            username: sessionStorage.getItem('username') || "DIKA_NEXA",
+            saldo: 0,
+            apiKey: sessionStorage.getItem('apiKey') || "NX-PX99-B0X2-K991A"
+        };
+
+        window.onload = function() {
+            document.getElementById('p-username').innerText = userData.username;
+            document.getElementById('u-display').innerText = userData.username;
+            document.getElementById('p-saldo').innerText = "RP " + userData.saldo.toLocaleString();
+            document.getElementById('p-apikey').innerText = userData.apiKey;
+            
+            setTimeout(() => { 
+                const intro = document.getElementById('intro');
+                if(intro) intro.style.display = 'none'; 
+            }, 4000);
+        }
+
+        function toggleMenu() {
+            const menu = document.getElementById('menuPopup');
+            const overlay = document.getElementById('overlay');
+            const isOpen = menu.style.display === 'block';
+
+            if(isOpen) {
+                closeAll();
+            } else {
+                closeAll();
+                menu.style.display = 'block';
+                overlay.classList.add('active', 'blur-mode');
+                overlay.classList.remove('no-blur');
+            }
+        }
+
+        function toggleProfile() {
+            const profile = document.getElementById('profilePopup');
+            const overlay = document.getElementById('overlay');
+            const isOpen = profile.style.display === 'block';
+
+            if(isOpen) {
+                closeAll();
+            } else {
+                closeAll();
+                profile.style.display = 'block';
+                overlay.classList.add('active', 'no-blur');
+            }
+        }
+
+        function closeAll() {
+            document.getElementById('menuPopup').style.display = 'none';
+            document.getElementById('profilePopup').style.display = 'none';
+            const overlay = document.getElementById('overlay');
+            overlay.classList.remove('active', 'blur-mode', 'no-blur');
+        }
+
+        function copyKey(e) {
+            e.stopPropagation();
+            const key = userData.apiKey;
+            
+            // Perbaikan metode copy menggunakan fallback jika clipboard API gagal
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(key).then(showSuccess);
+            } else {
+                const el = document.createElement('textarea');
+                el.value = key;
+                el.style.position = 'absolute';
+                el.style.left = '-9999px';
+                document.body.appendChild(el);
+                el.select();
+                document.execCommand('copy');
+                document.body.removeChild(el);
+                showSuccess();
+            }
+            
+            function showSuccess() {
+                const box = document.getElementById('p-apikey-container');
+                const textEl = document.getElementById('p-apikey');
+                
+                textEl.innerText = "BERHASIL DISALIN!";
+                box.style.borderColor = "#4ade80";
+                
+                setTimeout(() => {
+                    textEl.innerText = userData.apiKey;
+                    box.style.borderColor = "#333";
+                }, 1200);
+            }
+        }
+
+        function logout() { 
+            sessionStorage.clear(); 
+            location.reload(); 
+        }
+    </script>
+</body>
+</html>
