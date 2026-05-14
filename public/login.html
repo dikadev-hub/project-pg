@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LOGIN | NEXAPAY</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@700&family=Plus+Jakarta+Sans:wght@400;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: #0a0a0a url('https://i.ibb.co.com/KxkC9zbH/minecraft-farm-wallpaper.jpg') no-repeat center center fixed;
+            background-size: cover;
+        }
+        .glass-login {
+            background: rgba(15, 15, 15, 0.85);
+            backdrop-filter: blur(25px);
+            border: 2px solid rgba(255, 255, 255, 0.15);
+            box-shadow: 0 50px 100px -20px rgba(0, 0, 0, 0.8);
+        }
+        .input-field {
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+        .input-field:focus {
+            border-color: #fbbf24;
+            background: rgba(255, 255, 255, 0.08);
+            outline: none;
+        }
+        .error-box {
+            display: none;
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid #ef4444;
+            color: #ef4444;
+            padding: 10px;
+            border-radius: 12px;
+            font-size: 10px;
+            font-weight: 800;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-6 text-white uppercase">
+    <div class="fixed inset-0 bg-black/60 -z-10"></div>
+
+    <div class="max-w-md w-full glass-login rounded-[3rem] p-12 shadow-2xl">
+        <div class="text-center mb-10">
+            <div onclick="window.location.href='../index.html'" class="w-16 h-16 bg-yellow-500 rounded-2xl flex items-center justify-center font-black text-black text-2xl mx-auto mb-6 cursor-pointer shadow-xl hover:rotate-6 transition-transform">N</div>
+            <h1 class="text-4xl font-black font-heading italic tracking-tighter">LOGIN <span class="text-yellow-500">MEMBER</span></h1>
+            <p class="text-gray-500 text-[10px] mt-2 font-black tracking-[0.2em]">AKSES DASBOR NEXAPAY</p>
+        </div>
+
+        <!-- Notifikasi Error -->
+        <div id="errorMessage" class="error-box">LOGIN GAGAL: USERNAME ATAU PASSWORD SALAH!</div>
+
+        <form id="loginForm" class="space-y-6">
+            <div class="space-y-2">
+                <label class="text-[10px] font-black text-gray-500 tracking-[0.2em] ml-1">USER ID / AKUN</label>
+                <input type="text" id="username" required placeholder="MASUKKAN ID" class="w-full input-field px-7 py-5 rounded-2xl text-sm font-black tracking-tight">
+            </div>
+            
+            <div class="space-y-2">
+                <label class="text-[10px] font-black text-gray-500 tracking-[0.2em] ml-1">KATA SANDI</label>
+                <input type="password" id="password" required placeholder="••••••••" class="w-full input-field px-7 py-5 rounded-2xl text-sm font-black tracking-tight">
+            </div>
+
+            <button type="submit" id="submitBtn" class="w-full bg-yellow-500 hover:bg-yellow-400 text-black py-5 rounded-2xl font-black text-xl transition-all active:scale-95 shadow-2xl shadow-yellow-500/20 mt-4 tracking-tighter">
+                MASUK SEKARANG
+            </button>
+        </form>
+
+        <div class="mt-10 pt-8 border-t-2 border-white/5 text-center">
+            <p class="text-white/30 text-[10px] font-black mb-4 tracking-widest">BELUM PUNYA AKSES?</p>
+            <a href="https://wa.me/6283121495921" target="_blank" class="text-yellow-500 font-black text-xs hover:text-white transition-colors tracking-tighter underline underline-offset-4 decoration-2">
+                HUBUNGI ADMIN (10K) →
+            </a>
+        </div>
+    </div>
+
+    <!-- Home Link -->
+    <button onclick="window.location.href='../index.html'" class="fixed bottom-10 text-gray-600 hover:text-white transition-colors text-[10px] font-black tracking-[0.5em]">
+        BALIK HOME
+    </button>
+
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const usernameInput = document.getElementById('username').value;
+            const passwordInput = document.getElementById('password').value;
+            const errorDiv = document.getElementById('errorMessage');
+            const submitBtn = document.getElementById('submitBtn');
+
+            // Feedback Visual Loading
+            submitBtn.innerText = "MENGECEK...";
+            submitBtn.disabled = true;
+            errorDiv.style.display = 'none';
+
+            try {
+                // Fetch data dari database local (sesuaikan path jika berbeda)
+                const response = await fetch('../database/user.json');
+                if (!response.ok) throw new Error('Gagal memuat database');
+                
+                const users = await response.json();
+
+                // Cari user yang cocok
+                const user = users.find(u => u.username === usernameInput && u.password === passwordInput);
+
+                if (user) {
+                    // Simpan data session (Hanya contoh, jangan simpan API Key di sini untuk produksi)
+                    sessionStorage.setItem('isLoggedIn', 'true');
+                    sessionStorage.setItem('username', user.username);
+                    sessionStorage.setItem('apiKey', user.apikey);
+
+                    submitBtn.innerText = "BERHASIL!";
+                    submitBtn.classList.remove('bg-yellow-500');
+                    submitBtn.classList.add('bg-green-500');
+
+                    // Redirect ke Dashboard (Ubah path sesuai tujuan setelah login)
+                    setTimeout(() => {
+                        window.location.href = 'dashboard.html'; 
+                    }, 1000);
+                } else {
+                    throw new Error('Username atau Password salah');
+                }
+
+            } catch (error) {
+                console.error(error);
+                errorDiv.innerText = error.message.toUpperCase();
+                errorDiv.style.display = 'block';
+                submitBtn.innerText = "MASUK SEKARANG";
+                submitBtn.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>
